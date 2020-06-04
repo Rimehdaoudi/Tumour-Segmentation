@@ -22,5 +22,5 @@ class Convert(object):
             minc = load(self.dir + self.fileList[i])
             basename = self.fileList[i].split(os.extsep, 1)[0]
             out = Nifti1Image(minc.get_fdata(), affine=self.affine)
-            save(out, self.dir + basename + '.nii')
+            save(out, self.dir + basename + '.nii.gz')
             print("Converting: ", basename)

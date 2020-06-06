@@ -2,8 +2,6 @@
 import os
 import numpy as np
 import nibabel as nib
-from nilearn.image import smooth_img
-from nilearn.image import resample_img
 
 # Create the Load Data class.
 class LoadData(object):
@@ -20,23 +18,12 @@ class LoadData(object):
 
     # Load the images and store in a list.
     def loadImages(self):
-        self.files = os.listdir(self.dir)
+        self.files = os.listdir(self.dirImages)
         data_all = []
         for i in self.files:
-            self.image = nib.load(self.dirImages + i)
-            self.imageData = self.image.get_fdata()
-            data_all.append(self.imageData)
+            self.images = nib.load(self.dirImages + i)
+            data_all.append(self.images)
         return data_all
-
-    # Smooth an image.
-    def smoothImage(self, image):
-        smoothedImage = smooth_img(image)
-        return smoothedImage
-
-    # Smooth a list of images.
-    def smoothImages(self, images):
-        smoothedImages = smooth_image(images)
-        return smoothedImages
 
     # Load a single tumour mask.
     def loadMask(self, dataFile):
@@ -48,22 +35,13 @@ class LoadData(object):
         self.files = os.listdir(self.dir)
         data_all = []
         for i in self.files:
-            self.image = nib.load(self.dirMask + i)
-            self.imageData = self.image.get_fdata()
-            data_all.append(self.imageData)
+            self.images = nib.load(self.dirMask + i)
+            data_all.append(self.images)
         return data_all
 
-    # Downsample an MRI image.
-    def downsampledImage(self, image):
-        downsampledImage_ = resample_img(image, target_affine = np.eye(3)*2., interpolation = 'nearest')
-        print("Original Image Shape: ", image.shape)
-        print("New Image Shape: ", downsampledImage_.shape)
-        return downsampledImage_
-
-    # Upsampled an MRI image.
-    def upsampledImage(self, image):
-        upsampledImage = resample_img(image, target_affine = np.eye(3)*0.5, interpolation = 'nearest')
-        print("Original Image Shape: ", image.shape)
-        print("New Image Shape: ", upsampledImage.shape)
-        return upsampledImage
-        
+    def retrieveData(self, images):
+        imageData = []
+        for i in range(len(images)):
+            self.data = images[i].get_fdata()
+            imageData.append(self.data)
+        return imageData

@@ -11,14 +11,14 @@ class ImageDisplay(object):
         self.imageDir = ImageDirectory
         self.maskDir = MaskDirectory
 
-    # Basic plot showing the three image planes.
-    def displayPlanes(self, image):
-        plotting.plot_img(image)
-        plotting.show()
-
     # Basic anatomical plot of the three image planes.
     def anatomicalPlot(self, image):
-        plotting.plot_anat(image, draw_cross=False, display_mode='z')
+        plotting.plot_anat(image, cut_coords = [0, 0, 0], draw_cross=False, annotate = False)
+        plotting.show()
+
+    # Overlay the image mask with the original image.
+    def overlayMask(self, image, mask):
+        plotting.plot_roi(mask, image, cut_coords = [0, 0, 0], annotate = False, draw_cross = False)
         plotting.show()
 
     # Create the function to display a single image.

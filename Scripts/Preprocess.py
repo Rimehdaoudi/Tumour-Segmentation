@@ -1,7 +1,7 @@
 # Import the required libraries.
 import numpy as np
 from skimage.transform import resize
-from nilearn.image import smooth_img
+from nilearn.image import smooth_img, resample_to_img
 
 # Pre-process class.
 class Process(object):
@@ -44,3 +44,8 @@ class Process(object):
             smoothedImages.append(smoothedImage)
             print("Image Smoothened")
         return smoothedImages
+
+    # Resample the mask to the size of the MRI image.
+    def resampleToImage(self, image, mask)
+        resampledImage = resample_to_img(mask, image)
+        return resampledImage

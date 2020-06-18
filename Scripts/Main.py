@@ -4,16 +4,20 @@ from Display import ImageDisplay
 from Load import LoadData
 from Preprocess import Process
 
-from nilearn.image.image import mean_img
-from nilearn.plotting import plot_epi, show, plot_roi
-from nilearn.masking import compute_epi_mask
-
 # Main function.
 if __name__ == "__main__":
 
     # Set the directory.
     myDirImages = '../Dataset/Pre-op/'
     myDirMasks = '../Dataset/Masks/'
+
+    # Load single image.
+    image = nib.load(myDirImages + "02_preop_mri.mnc")
+    masks = nib.load(myDirMasks + "02_two_tumor.mnc")
+
+    # Retrieve the data 
+    imageData = image.get_fdata()
+    maskData = mask.get_fdata()
 
     # Display the images.
     img = ImageDisplay(myDirImages, myDirMasks)
@@ -28,14 +32,21 @@ if __name__ == "__main__":
     smoothenedImages = pre.smoothImages(images, 0.3)
 
     # Load the image data.
-    imageData = dataLoad.retrieveData(smoothenedImages)
-    maskData = dataLoad.retrieveData(smoothenedMasks)
+    imagesData = dataLoad.retrieveData(smoothenedImages)
+    masksData = dataLoad.retrieveData(smoothenedMasks)
     
     # Resample the images.
-    resampledImages = pre.resampleImages(imageData, 256)
-    resampledMasks = pre.resampleImages(maskData, 256) 
+    resampledImages = pre.resampleImages(imagesData, 256)
+    resampledMasks = pre.resampleImages(masksData, 256) 
 
     # Re-display the resampled images.
-    img.displayResampledImage(resultData, 3, 10, 5)
+    img.displayResampledImage(reData, 6, 50, 10)
     img.displayResampledImage(resampledMasks, 4, 3, 3)
 
+    # Output directory
+    OUTDIR = './Images/Patient 1/Coronal/'
+
+    # Call the slice extractor (180 IS MAX!)
+    pre.sliceExtractor(imageData, 180, OUTDIR, True, False, False)
+
+    

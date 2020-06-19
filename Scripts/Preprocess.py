@@ -47,7 +47,7 @@ class Process(object):
         return smoothedImages
 
     # Resample the mask to the size of the MRI image.
-    def resampleToImage(self, image, mask):
+    def resampleToImage(self, mask, image):
         resampledImage = resample_to_img(mask, image)
         return resampledImage
 
@@ -67,22 +67,21 @@ class Process(object):
             if coronal == True:
                 slices = imageData[:, i, :]
                 flipVertical = cv2.flip(slices, 0)
-                cv2.imwrite(OUTDIR + "Coronal_" + str(i) + ".png", flipVertical)
+                formatted = (flipVertical * 255).astype('uint8')
+                cv2.imwrite(OUTDIR + "Coronal_" + str(i) + ".png", formatted)
             # Sagittal
             elif sagittal == True:
                 slices = imageData[:, :, i]
                 flipVertical = cv2.flip(slices, 0)
-                cv2.imwrite(OUTDIR + "Sagittal_" + str(i) + ".png", flipVertical)
+                formatted = (flipVertical * 255).astype('uint8')
+                cv2.imwrite(OUTDIR + "Sagittal_" + str(i) + ".png", formatted)
             # Transversal
             elif transversal == True:
                 slices = imageData[i, :, :]
                 flipVertical = cv2.flip(slices, 0)
-                cv2.imwrite(OUTDIR + "Transversal_" + str(i) + ".png", flipVertical)
+                formatted = (flipVertical * 255).astype('uint8')
+                cv2.imwrite(OUTDIR + "Transversal_" + str(i) + ".png", formatted)
             else:
                 print("Failed")
                 break
         print("Passed")
-
-
-        
-

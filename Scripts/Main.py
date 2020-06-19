@@ -8,8 +8,8 @@ from Preprocess import Process
 if __name__ == "__main__":
 
     # Set the directory.
-    myDirImages = '../Dataset/Pre-op/'
-    myDirMasks = '../Dataset/Masks/'
+    myDirImages = '../Dataset/Original/Pre-op/'
+    myDirMasks = '../Dataset/Original/Masks/'
 
     # Load single image.
     image = nib.load(myDirImages + "02_preop_mri.mnc")
@@ -17,15 +17,11 @@ if __name__ == "__main__":
 
     # Retrieve the data 
     imageData = image.get_fdata()
-    maskData = mask.get_fdata()
+    maskData = masks.get_fdata()
 
     # Display the images.
     img = ImageDisplay(myDirImages, myDirMasks)
     img.displayImages('01_preop_mri.mnc', 6, 0, 30)
-
-    # Resampled the images.
-    dataLoad = LoadData(myDirImages, myDirMasks)
-    images = dataLoad.loadImages()
 
     # Smooth the images (using the image object rather than the data.)
     pre = Process()
@@ -43,10 +39,12 @@ if __name__ == "__main__":
     img.displayResampledImage(reData, 6, 50, 10)
     img.displayResampledImage(resampledMasks, 4, 3, 3)
 
+    # Resample masks to target image.
+    resampledImage = resample_to_img(masks, image)
+    resampledData = resampledImage.get_fdata()
+
     # Output directory
-    OUTDIR = './Images/Patient 1/Coronal/'
+    OUTDIR = '../Dataset/2D/Masks/Patient 1/Transversal/'
 
     # Call the slice extractor (180 IS MAX!)
-    pre.sliceExtractor(imageData, 180, OUTDIR, True, False, False)
-
-    
+    pre.sliceExtractor(resampledData, 180, OUTDIR, False, False, True) 

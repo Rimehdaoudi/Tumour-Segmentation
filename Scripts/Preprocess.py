@@ -61,27 +61,50 @@ class Process(object):
         return resampledImages
 
     # Extract each slice from an MRI image
-    def sliceExtractor(self, imageData, numSlices, OUTDIR = ' ', coronal = False, sagittal = False, transversal = False):
+    def sliceExtractor(self, imageData, numSlices, OUTDIR = ' ', Image = False, Mask = False, coronal = False, sagittal = False, transversal = False):
         for i in range(numSlices):
-            # Coronal
-            if coronal == True:
-                slices = imageData[:, i, :]
-                flipVertical = cv2.flip(slices, 0)
-                formatted = (flipVertical * 255).astype('uint8')
-                cv2.imwrite(OUTDIR + "Coronal_" + str(i) + ".png", formatted)
-            # Sagittal
-            elif sagittal == True:
-                slices = imageData[:, :, i]
-                flipVertical = cv2.flip(slices, 0)
-                formatted = (flipVertical * 255).astype('uint8')
-                cv2.imwrite(OUTDIR + "Sagittal_" + str(i) + ".png", formatted)
-            # Transversal
-            elif transversal == True:
-                slices = imageData[i, :, :]
-                flipVertical = cv2.flip(slices, 0)
-                formatted = (flipVertical * 255).astype('uint8')
-                cv2.imwrite(OUTDIR + "Transversal_" + str(i) + ".png", formatted)
-            else:
-                print("Failed")
-                break
-        print("Passed")
+            # If extracting an image use this.
+            if Image == True:
+                # Coronal
+                if coronal == True:
+                    slices = imageData[:, i, :]
+                    flipVertical = cv2.flip(slices, 0)      
+                    cv2.imwrite(OUTDIR + "Coronal_" + str(i) + ".png", flipVertical)
+                # Sagittal
+                elif sagittal == True:
+                    slices = imageData[:, :, i]
+                    flipVertical = cv2.flip(slices, 0) 
+                    cv2.imwrite(OUTDIR + "Sagittal_" + str(i) + ".png", flipVertical)
+                # Transversal
+                elif transversal == True:
+                    slices = imageData[i, :, :]
+                    flipVertical = cv2.flip(slices, 0)
+                    cv2.imwrite(OUTDIR + "Transversal_" + str(i) + ".png", flipVertical)
+                else:
+                    print("Extraction failed")
+                    break
+
+            # If extracting a mask use this.
+            if Mask == True:
+                # Coronal
+                if coronal == True:
+                    slices = imageData[:, i, :]
+                    flipVertical = cv2.flip(slices, 0)
+                    formatted = (flipVertical * 255).astype('uint8')
+                    cv2.imwrite(OUTDIR + "Coronal_" + str(i) + ".png", formatted)
+                # Sagittal
+                elif sagittal == True:
+                    slices = imageData[:, :, i]
+                    flipVertical = cv2.flip(slices, 0)
+                    formatted = (flipVertical * 255).astype('uint8')
+                    cv2.imwrite(OUTDIR + "Sagittal_" + str(i) + ".png", formatted)
+                # Transversal
+                elif transversal == True:
+                    slices = imageData[i, :, :]
+                    flipVertical = cv2.flip(slices, 0)
+                    formatted = (flipVertical * 255).astype('uint8')
+                    cv2.imwrite(OUTDIR + "Transversal_" + str(i) + ".png", formatted)
+                else:
+                    print("Extraction failed")
+                    break
+        print("Extraction complete")

@@ -13,6 +13,7 @@ class ImageDisplay(object):
 
     # Basic anatomical plot of the three image planes.
     def anatomicalPlot(self, image):
+        plotting.plot_anat(image, cut_coords = [0, 0, 0], draw_cross=False, annotate = False)
         plotting.plot_anat(image, cut_coords = (-10, 0, 0), draw_cross=False, annotate = False)
         plotting.show()
 

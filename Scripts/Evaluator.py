@@ -1,9 +1,12 @@
 # Import the required libaries
+import os
 import numpy as np
 import skimage.io
 
+# Evaluator class.
 class Evaluate(object):
 
+    # Class constructor, assigns prediction and ground truth.
     def __init__(self, pred_image, gt_image):
         self.pred_image = pred_image
         self.gt_image = gt_image
@@ -25,6 +28,7 @@ class Evaluate(object):
 
         return n11, n12, n21, n22
 
+    # Returns the pixel accuracy.
     def pixel_accuracy(self):
 
         n11, n12, n21, n22 = Evaluate.cm_terms(self)
@@ -37,6 +41,7 @@ class Evaluate(object):
             pa = float(n11+n22)/float(t1+t2)
         return pa
 
+    # Returns the mean accuracy.
     def mean_accuracy(self):
 
         n11, n12, n21, n22 = Evaluate.cm_terms(self)
@@ -53,12 +58,14 @@ class Evaluate(object):
             ma = (float(n11)/float(t1) + float(n22)/float(t2))/2
         return ma
 
+    # Returns the IOU.
     def IOU(self):
         intersection = np.logical_and(self.gt_image, self.pred_image)
         union = np.logical_or(self.gt_image, self.pred_image)
         iou_score = np.sum(intersection) / np.sum(union)
         return iou_score
 
+    # Returns the mean IOU.
     def mean_IOU(self):
 
         n11, n12, n21, n22 = Evaluate.cm_terms(self)
@@ -73,6 +80,7 @@ class Evaluate(object):
             mIOU = (float(n11)/float(t1+n21)  + float(n22)/float(t2+n12))/2
         return mIOU
     
+    # Returns the frequency weighted IOU.
     def fweight_IOU(self):
 
         n11, n12, n21, n22 = Evaluate.cm_terms(self)
@@ -115,35 +123,72 @@ class Evaluate(object):
 
         return TP, TN, FP, FN, fpr, tpr
 
-
+# Functions to read in the images.
+# WILL BE REMOVED IN NEXT UPDATE.
 def readImage(PATH):
     return skimage.io.imread(PATH)
 
+def readImages(PATH, extensions):
+    args = [os.path.join(PATH, filename)
+        for filename in os.listdir(PATH)
+            if any(filename.lower().endswith(ext) for ext in extensions)]
+    
+    imgs = [readImage(arg) for arg in args]
+    return imgs
+
+# Main method.
 if __name__ == "__main__":
-    PATH_MASKS = 'Masks/2.png'
-    PATH_PRED = 'Results/2.png'
 
-    target = readImage(PATH_MASKS)
-    pred = readImage(PATH_PRED)
+    gt_image = 'Masks/Full'
+    pred_image = 'Results/Full'
 
-    val = Evaluate(pred, target)
-    TP, TN, FP, FN, fpr, tpr = val.roc()
+    num_images = len(os.listdir(gt_image))
+
+    y_true = readImages(gt_image, '.png')
+    y_pred = readImages(pred_image, '.png')
+
+    pa_array = []
+    ma_array = []
+    IOU_array = []
+    mIOU_array = []
+    fwIOU_array = []
+    
+    for i in range(num_images):
+        val = Evaluate(y_pred[i], y_true[i])
+        pa = val.pixel_accuracy()
+        
+        ma = val.mean_accuracy()
+        IOU = val.IOU()
+        mIOU = val.mean_IOU()
+        fwIOU = val.fweight_IOU()
+
+        pa_array.append(pa)
+        ma_array.append(ma)
+        IOU_array.append(IOU)
+        mIOU_array.append(mIOU)
+        fwIOU_array.append(fwIOU)
+
+    # Compute the average of each metric.
+    pa = np.mean(np.array(pa_array))
+    ma = np.mean(np.array(ma_array))
+    IOU = np.mean(np.array(IOU_array))
+    mIOU = np.mean(np.array(mIOU_array))
+    fwIOU = np.mean(np.array(fwIOU_array))
 
     print(" ")
-    print("Evaluation Metrics", "\t\t\tROC")
-    print("----------------------", "\t\t----------------------")
-    pixel_acc = val.pixel_accuracy()
-    print("Pixel Accuracy: ", str(round(pixel_acc, 3)), "\t\tTrue Positive's: ", str(TP))
+    print("Average Pixel Accuracy: ", str(round(pa, 3)))
+    print("Average Mean Accuracy: ", str(round(ma, 3)))
+    print("Average IOU: ", str(round(IOU, 3)))
+    print("Average Mean IOU: ", str(round(mIOU, 3)))
+    print("Average Weighted IOU: ", str(round(fwIOU, 3)))
 
-    mean_acc = val.mean_accuracy()
-    print("Mean Accuracy: ", str(round(mean_acc, 3)), "\t\tFalse Positive's: ", str(FP))
+    # Write results to file.
+    f = open('./Evaluation Results/Full.txt','w')
 
-    mean_IOU = val.mean_IOU()
-    print("Mean IOU: ", str(round(mean_IOU, 3)), "\t\tTrue Negative's: ", str(TN))
+    f.write('Average Pixel Accuracy: %s \n' %(str(round(pa, 3))))
+    f.write('Average Mean Accuracy: %s \n' %(str(round(ma, 3))))
+    f.write('Average IOU: %s \n' %(str(round(IOU, 3))))
+    f.write('Average Mean IOU: %s \n' %(str(round(mIOU, 3))))
+    f.write('Average Weighted IOU: %s \n' %(str(round(fwIOU, 3))))
 
-    IOU = val.IOU()
-    print("IOU: ", str(round(IOU, 3)), "\t\t\tFalse Negative's: ", str(FN))
-
-    weight_IOU = val.fweight_IOU()
-    print("Weighted IOU: ", str(round(weight_IOU, 3)), "\t\tTrue Positive Rate: ", str(round(tpr, 3)))
-    print("----------------------", "\t\t----------------------")
+    f.close()

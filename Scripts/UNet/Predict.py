@@ -32,7 +32,7 @@ if __name__ == "__main__":
     np.random.seed(42)
     tf.random.set_seed(42)
 
-    PATH = "../Dataset/UNET-Data/"
+    PATH = "../../Dataset/"
     BATCH = 8
 
     (train_x, train_y), (valid_x, valid_y), (test_x, test_y) = load_data(PATH)
@@ -44,7 +44,7 @@ if __name__ == "__main__":
         test_steps += 1
 
     with CustomObjectScope({'iou': iou}):
-    	model = tf.keras.models.load_model("Models/model_coronal.h5")
+    	model = tf.keras.models.load_model("../Models/model_FULL.h5")
     model.evaluate(test_dataset, steps=test_steps)
 
     for i, (x, y) in tqdm(enumerate(zip(test_x, test_y)), total=len(test_x)):
@@ -52,8 +52,8 @@ if __name__ == "__main__":
            y = read_mask(y)
            y_pred = model.predict(np.expand_dims(x, axis=0))[0] > 0.5
            y_pred = y_pred * 255.0
-           cv2.imwrite(f"Masks/{i}.png", y)
-           cv2.imwrite(f"Results/{i}.png", y_pred)
+           cv2.imwrite(f"../Masks/FULL_{i}.png", y)
+           cv2.imwrite(f"../Results/FULL_{i}.png", y_pred)
            # h, w, _ = x.shape
            # white_line = np.ones((h, 10, 3)) * 255.0
            # all_images = [

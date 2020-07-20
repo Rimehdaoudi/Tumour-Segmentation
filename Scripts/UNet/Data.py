@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 
 def load_data(PATH, split=0.1):
-    images = sorted(glob(os.path.join(PATH, "Coronal/*")))
-    masks = sorted(glob(os.path.join(PATH, "Coronal-Mask/*")))
+    images = sorted(glob(os.path.join(PATH, "Images/*")))
+    masks = sorted(glob(os.path.join(PATH, "Masks/*")))
 
     total_size = len(images)
     valid_size = int(split * total_size)
@@ -56,7 +56,7 @@ def tf_dataset(x, y, batch=8):
     return dataset
 
 if __name__ == "__main__":
-    PATH = "../Dataset/UNET-Data/"
+    PATH = "../../Dataset/"
     (train_x, train_y), (valid_x, valid_y), (test_x, test_y) = load_data(PATH)
 
     print("Training data: ", len(train_x))

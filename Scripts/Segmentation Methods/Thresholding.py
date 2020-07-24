@@ -1,5 +1,6 @@
 # Import the required libraries.
 import cv2
+import glob
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -11,6 +12,20 @@ class Threshold(object):
 
     # Strips the skull of the brain scan (Transversal).
     def skullStrip(self):
+
+        for i in range(len(self.image)):
+            self.gray_images = []
+            self.gray_image = cv2.cvtColor(self.image[i], cv2.COLOR_BGR2GRAY)
+            self.gray_images.append(self.gray_image)
+            self.ret, self.thresh = cv2.threshold(self.gray_images[i], 0, 255, cv2.THRESH_OTSU)
+            # self.colormask = np.zeros(self.image[i].shape, dtype=np.uint8)
+            # self.colormask[self.thresh != 0] = np.array((0, 0, 255))
+            # self.blended = cv2.addWeighted(self.image[i], 0.7, self.colormask, 0.1,0)
+
+        print("Passed")
+
+
+        """
         self.gray_image = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
         self.ret, self.thresh = cv2.threshold(self.gray_image, 0, 255, cv2.THRESH_OTSU)
         self.colormask = np.zeros(self.image.shape, dtype=np.uint8)
@@ -33,8 +48,9 @@ class Threshold(object):
         plt.gca().set_title("Skull Stripped"), plt.imshow(brain_out, cmap = 'gray')
         plt.xticks([]), plt.yticks([])
         plt.show()
+        """
 
-        return brain_out
+        # return brain_out
 
     # Apply a median blur to a skull stripped image.
     def filter(self, stripped_image, kernel):
@@ -64,13 +80,25 @@ class Threshold(object):
         plt.xticks([]), plt.yticks([])
         plt.show()
 
-
 # Main method.
 if __name__ == "__main__":
     
-    image = cv2.imread('../../Dataset/UNET-Data/Transversal/Image_12_Transversal_108.png')
+    PATH = '../../Dataset/UNET-Data/Transversal/'
+    images = [cv2.imread(file) for file in glob.glob(PATH + "*.png")]
 
-    thres = Threshold(image)
-    skull_stripped = thres.skullStrip()
-    median = thres.filter(skull_stripped, 5)
-    thres.otsuThreshold(skull_stripped, median)
+    resized_images = []
+    for i in range(len(images)):
+        resized = cv2.resize(images[i], (128, 128), interpolation = cv2.INTER_AREA)
+        resized_images.append(resized)
+
+    new_images = []
+    for i in range(len(resized_images)):
+        image = cv2.cvtColor(resized_images[i], cv2.COLOR_BGR2GRAY)
+        new_images.append(image)
+
+    print(new_images[0].shape)
+
+    # thres = Threshold(resized_images)
+    # thres.skullStrip()
+    # median = thres.filter(skull_stripped, 5)
+    # thres.otsuThreshold(skull_stripped, median)

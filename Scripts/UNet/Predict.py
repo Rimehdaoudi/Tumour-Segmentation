@@ -52,6 +52,7 @@ if __name__ == "__main__":
            y = read_mask(y)
            y_pred = model.predict(np.expand_dims(x, axis=0))[0] > 0.5
            y_pred = y_pred * 255.0
+           cv2.imwrite(f"../Evaluation Scans/Full/Scans_{i}.png", x)
            cv2.imwrite(f"../Masks/FULL_{i}.png", y)
            cv2.imwrite(f"../Results/FULL_{i}.png", y_pred)
            # h, w, _ = x.shape

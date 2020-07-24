@@ -1,7 +1,9 @@
 # Import the required libaries
 import os
+import glob
 import numpy as np
 import skimage.io
+from skimage.transform import resize
 
 # Evaluator class.
 class Evaluate(object):
@@ -123,29 +125,21 @@ class Evaluate(object):
 
         return TP, TN, FP, FN, fpr, tpr
 
-# Functions to read in the images.
-# WILL BE REMOVED IN NEXT UPDATE.
-def readImage(PATH):
-    return skimage.io.imread(PATH)
-
-def readImages(PATH, extensions):
-    args = [os.path.join(PATH, filename)
-        for filename in os.listdir(PATH)
-            if any(filename.lower().endswith(ext) for ext in extensions)]
-    
-    imgs = [readImage(arg) for arg in args]
-    return imgs
-
 # Main method.
 if __name__ == "__main__":
 
-    gt_image = 'Masks/Full'
-    pred_image = 'Results/Full'
+    gt_image = './Masks/Full/'
+    pred_image = './Segmentation Methods/Water Shed Results/Full/'
 
     num_images = len(os.listdir(gt_image))
 
-    y_true = readImages(gt_image, '.png')
-    y_pred = readImages(pred_image, '.png')
+    y_true = [skimage.io.imread(file) for file in glob.glob(gt_image + "*.png")]
+    pred = [skimage.io.imread(file) for file in glob.glob(pred_image + "*.png")]
+
+    y_pred = []
+    for i in range(len(pred)):
+        re_pred = resize(pred[i], (128, 128), anti_aliasing=True)
+        y_pred.append(re_pred)
 
     pa_array = []
     ma_array = []
@@ -183,7 +177,7 @@ if __name__ == "__main__":
     print("Average Weighted IOU: ", str(round(fwIOU, 3)))
 
     # Write results to file.
-    f = open('./Evaluation Results/Full.txt','w')
+    f = open('./Segmentation Methods/Evaluation Results/Water Shed/Full/Water_Shed.txt','w')
 
     f.write('Average Pixel Accuracy: %s \n' %(str(round(pa, 3))))
     f.write('Average Mean Accuracy: %s \n' %(str(round(ma, 3))))

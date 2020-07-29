@@ -4,6 +4,7 @@ import glob
 import numpy as np
 import skimage.io
 from skimage.transform import resize
+from skimage import color
 
 # Evaluator class.
 class Evaluate(object):
@@ -129,24 +130,24 @@ class Evaluate(object):
 if __name__ == "__main__":
 
     gt_image = './Masks/Full/'
-    pred_image = './Segmentation Methods/Water Shed Results/Full/'
+    pred_image = './Segmentation Methods/Fuzzy Results/Full/'
 
     num_images = len(os.listdir(gt_image))
 
     y_true = [skimage.io.imread(file) for file in glob.glob(gt_image + "*.png")]
     pred = [skimage.io.imread(file) for file in glob.glob(pred_image + "*.png")]
-
+    
     y_pred = []
     for i in range(len(pred)):
-        re_pred = resize(pred[i], (128, 128), anti_aliasing=True)
-        y_pred.append(re_pred)
+        new_pred = color.rgb2gray(pred[i])
+        y_pred.append(new_pred)
 
     pa_array = []
     ma_array = []
     IOU_array = []
     mIOU_array = []
     fwIOU_array = []
-    
+ 
     for i in range(num_images):
         val = Evaluate(y_pred[i], y_true[i])
         pa = val.pixel_accuracy()
@@ -177,7 +178,7 @@ if __name__ == "__main__":
     print("Average Weighted IOU: ", str(round(fwIOU, 3)))
 
     # Write results to file.
-    f = open('./Segmentation Methods/Evaluation Results/Water Shed/Full/Water_Shed.txt','w')
+    f = open('./Segmentation Methods/Evaluation Results/Fuzzy CMeans/Full/Fuzzy_CMeans.txt','w')
 
     f.write('Average Pixel Accuracy: %s \n' %(str(round(pa, 3))))
     f.write('Average Mean Accuracy: %s \n' %(str(round(ma, 3))))

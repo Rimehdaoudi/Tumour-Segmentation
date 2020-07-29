@@ -21,13 +21,14 @@ warnings.filterwarnings("ignore")
 class FuzzyC(object):
 
     def readImage(self):
-        folder = '../Evaluation Scans/Coronal/'
+        folder = '../Evaluation Scans/Full/'
         list_images = os.listdir(folder)
         list_img = []
         for i in list_images:
             path = folder+i
             img = cv2.imread(path)
             img = cv2.resize(img, (128, 128))
+            img = cv2.medianBlur(img, 5)
             rgb_img = img.reshape((img.shape[0] * img.shape[1], 3))
             list_img.append(rgb_img)
             
@@ -139,7 +140,7 @@ class FuzzyC(object):
             cv2.imwrite(OUTDIR + "Result_" + str(i) + ".png", self.seg_array[i])
 
 if __name__ == "__main__":
-    OUTDIR = './Fuzzy Results/Coronal/'
+    OUTDIR = './Fuzzy Results/Full/'
 
     fuzzy = FuzzyC()
     list_img = fuzzy.readImage()

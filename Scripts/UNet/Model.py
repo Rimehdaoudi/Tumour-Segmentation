@@ -1,16 +1,7 @@
-import cv2
-import os
-import numpy as np
-from glob import glob
-import tensorflow as tf
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-
 from tensorflow.keras.layers import Conv2D, Activation, BatchNormalization
 from tensorflow.keras.layers import UpSampling2D, Input, Concatenate, MaxPool2D
 from tensorflow.keras.models import Model
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, CSVLogger, TensorBoard
-from tensorflow.keras.metrics import Recall, Precision
+
 
 def conv_block(x, num_filters):
     x = Conv2D(num_filters, (3, 3), padding="same")(x)
@@ -22,6 +13,7 @@ def conv_block(x, num_filters):
     x = Activation("relu")(x)
 
     return x
+
 
 def build_model():
     size = 128
@@ -55,6 +47,7 @@ def build_model():
     x = Activation("sigmoid")(x)
 
     return Model(inputs, x)
+
 
 if __name__ == "__main__":
     model = build_model()

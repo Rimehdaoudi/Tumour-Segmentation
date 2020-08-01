@@ -1,16 +1,14 @@
 # Import the required libraries.
 import os
-import cv2
 import skimage.io
-import numpy as np
 import nibabel as nib
 from sklearn.model_selection import train_test_split
 
+
 # Create the Load Data class.
 class LoadData3D(object):
-    
     # Class Constructor.
-    def __init__(self, directoryImages = " ", directoryMask = " "):
+    def __init__(self, directoryImages=" ", directoryMask=" "):
         self.dirImages = directoryImages
         self.dirMask = directoryMask
 
@@ -55,24 +53,26 @@ class LoadData3D(object):
             imageData.append(self.data)
         return imageData
 
+
 # Class for 2-Dimensional data
 class LoadData2D(object):
-
     # Read a single image.
     def readImage(self, PATH):
-        return image = skimage.io.imread(PATH)
+        return skimage.io.imread(PATH)
 
     # Read in multiple images.
     def readImages(self, PATH, extension):
         args = [os.path.join(PATH, filename)
-        for filename in os.listdir(PATH)
-            if any(filename.lower().endswith(ext) for ext in extensions)]
-    
-        imgs = [readImage(arg) for arg in args]
+                for filename in os.listdir(PATH)
+                if any(filename.lower().endswith(ext) for ext in extension)]
+        imgs = [self.readImage(arg) for arg in args]
         return imgs
 
     # X = Images and y = Masks (Must be arrays not objects!)
     def splitData(self, images, masks, splitSize):
-        X_train, X_test, y_train, y_test = train_test_split(images, masks, test_size = splitSize)
+        X_train, X_test, y_train, y_test = train_test_split(
+                images,
+                masks,
+                test_size=splitSize
+        )
         return X_train, X_test, y_train, y_test
-

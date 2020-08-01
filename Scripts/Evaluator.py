@@ -3,30 +3,29 @@ import os
 import glob
 import numpy as np
 import skimage.io
-from skimage.transform import resize
 from skimage import color
+
 
 # Evaluator class.
 class Evaluate(object):
-
     # Class constructor, assigns prediction and ground truth.
     def __init__(self, pred_image, gt_image):
         self.pred_image = pred_image
         self.gt_image = gt_image
 
     def cm_terms(self):
-        n11 = n12 = n21 = n22 =0
-        [rows,cols] = self.gt_image.shape
+        n11 = n12 = n21 = n22 = 0
+        [rows, cols] = self.gt_image.shape
 
         for i in range(rows):
             for j in range(cols):
-                if self.gt_image[i,j]==0 and self.pred_image[i,j]==0:
+                if self.gt_image[i, j] == 0 and self.pred_image[i, j] == 0:
                     n11 = n11+1
-                if self.gt_image[i,j]==0 and self.pred_image[i,j]>=1:
+                if self.gt_image[i, j] == 0 and self.pred_image[i, j] >= 1:
                     n12 = n12 + 1
-                if self.gt_image[i,j]>=1 and self.pred_image[i,j]==0:
+                if self.gt_image[i, j] >= 1 and self.pred_image[i, j] == 0:
                     n21 = n21 + 1
-                if self.gt_image[i,j]>=1 and self.pred_image[i,j]>=1:
+                if self.gt_image[i, j] >= 1 and self.pred_image[i, j] >= 1:
                     n22 = n22 + 1
 
         return n11, n12, n21, n22
@@ -80,9 +79,9 @@ class Evaluate(object):
         if (t1 + n21) != 0 and (t2 + n12) == 0:
             mIOU = float(n11)/float(t1+n21)
         else:
-            mIOU = (float(n11)/float(t1+n21)  + float(n22)/float(t2+n12))/2
+            mIOU = (float(n11)/float(t1+n21) + float(n22)/float(t2+n12))/2
         return mIOU
-    
+
     # Returns the frequency weighted IOU.
     def fweight_IOU(self):
 
@@ -90,7 +89,9 @@ class Evaluate(object):
         t1 = n11 + n12
         t2 = n21 + n22
 
-        fwIOU = float(float(t1*n11)/float(n11+n12+n21)  + float(t2*n22)/float(n12+n21+n22))/float(n11+n12+n21+n22)
+        fwIOU = float(
+                float(t1*n11)/float(n11+n12+n21) +
+                float(t2*n22)/float(n12+n21+n22))/float(n11+n12+n21+n22)
 
         return fwIOU
 
@@ -113,18 +114,18 @@ class Evaluate(object):
                 if self.gt_image[i, j] >= 1 and self.pred_image[i, j] == 0:
                     FN = FN + 1
 
-        if (FP+TN)==0:
+        if (FP+TN) == 0:
             fpr = 0
         else:
             fpr = float(FP)/float(FP+TN)
 
-
-        if (TP+FN)==0:
+        if (TP+FN) == 0:
             tpr = 0
         else:
             tpr = float(TP)/float(TP+FN)
 
         return TP, TN, FP, FN, fpr, tpr
+
 
 # Main method.
 if __name__ == "__main__":
@@ -134,9 +135,12 @@ if __name__ == "__main__":
 
     num_images = len(os.listdir(gt_image))
 
-    y_true = [skimage.io.imread(file) for file in glob.glob(gt_image + "*.png")]
-    pred = [skimage.io.imread(file) for file in glob.glob(pred_image + "*.png")]
-    
+    y_true = [skimage.io.imread(file)
+              for file in glob.glob(gt_image + "*.png")]
+
+    pred = [skimage.io.imread(file)
+            for file in glob.glob(pred_image + "*.png")]
+
     y_pred = []
     for i in range(len(pred)):
         new_pred = color.rgb2gray(pred[i])
@@ -147,11 +151,11 @@ if __name__ == "__main__":
     IOU_array = []
     mIOU_array = []
     fwIOU_array = []
- 
+
     for i in range(num_images):
         val = Evaluate(y_pred[i], y_true[i])
         pa = val.pixel_accuracy()
-        
+
         ma = val.mean_accuracy()
         IOU = val.IOU()
         mIOU = val.mean_IOU()
@@ -178,12 +182,14 @@ if __name__ == "__main__":
     print("Average Weighted IOU: ", str(round(fwIOU, 3)))
 
     # Write results to file.
-    f = open('./Segmentation Methods/Evaluation Results/Fuzzy CMeans/Full/Fuzzy_CMeans.txt','w')
+    f = open('./Segmentation Methods/'
+             'Evaluation Results/Fuzzy CMeans/'
+             'Full/Fuzzy_CMeans.txt', 'w')
 
-    f.write('Average Pixel Accuracy: %s \n' %(str(round(pa, 3))))
-    f.write('Average Mean Accuracy: %s \n' %(str(round(ma, 3))))
-    f.write('Average IOU: %s \n' %(str(round(IOU, 3))))
-    f.write('Average Mean IOU: %s \n' %(str(round(mIOU, 3))))
-    f.write('Average Weighted IOU: %s \n' %(str(round(fwIOU, 3))))
+    f.write('Average Pixel Accuracy: %s \n' % (str(round(pa, 3))))
+    f.write('Average Mean Accuracy: %s \n' % (str(round(ma, 3))))
+    f.write('Average IOU: %s \n' % (str(round(IOU, 3))))
+    f.write('Average Mean IOU: %s \n' % (str(round(mIOU, 3))))
+    f.write('Average Weighted IOU: %s \n' % (str(round(fwIOU, 3))))
 
     f.close()

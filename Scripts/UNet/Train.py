@@ -1,21 +1,20 @@
 import os
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
-
-import cv2
 import numpy as np
-from glob import glob
 import tensorflow as tf
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
 
-from tensorflow.keras.layers import Conv2D, Activation, BatchNormalization
-from tensorflow.keras.layers import UpSampling2D, Input, Concatenate, MaxPool2D
-from tensorflow.keras.models import Model
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, CSVLogger, TensorBoard
+from tensorflow.keras.callbacks import (
+        EarlyStopping,
+        ModelCheckpoint,
+        ReduceLROnPlateau,
+        CSVLogger,
+        TensorBoard
+)
 from tensorflow.keras.metrics import Recall, Precision
-from keras.utils import CustomObjectScope
 from Data import load_data, tf_dataset
 from Model import build_model
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+
 
 def iou(y_true, y_pred):
     def f(y_true, y_pred):
@@ -25,6 +24,7 @@ def iou(y_true, y_pred):
         x = x.astype(np.float32)
         return x
     return tf.numpy_function(f, [y_true, y_pred], tf.float32)
+
 
 if __name__ == "__main__":
     PATH = "../Dataset/UNET-Data/"
@@ -43,11 +43,15 @@ if __name__ == "__main__":
     model.compile(loss="binary_crossentropy", optimizer=opt, metrics=metrics)
 
     callbacks = [
-    	ModelCheckpoint("model.h5"),
-    	ReduceLROnPlateau(monitor="val_loss", factor=0.1, patience=3),
-    	CSVLogger("data.csv"),
-    	TensorBoard(),
-    	EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=False)
+        ModelCheckpoint("model.h5"),
+        ReduceLROnPlateau(monitor="val_loss", factor=0.1, patience=3),
+        CSVLogger("data.csv"),
+        TensorBoard(),
+        EarlyStopping(
+            monitor="val_loss",
+            patience=10,
+            restore_best_weights=False
+        )
     ]
 
     train_steps = len(train_x) // BATCH

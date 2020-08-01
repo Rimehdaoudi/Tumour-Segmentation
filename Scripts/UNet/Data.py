@@ -3,8 +3,8 @@ import os
 import numpy as np
 from glob import glob
 import tensorflow as tf
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
+
 
 def load_data(PATH, split=0.1):
     images = sorted(glob(os.path.join(PATH, "Images/*")))
@@ -14,13 +14,30 @@ def load_data(PATH, split=0.1):
     valid_size = int(split * total_size)
     test_size = int(split * total_size)
 
-    train_x, valid_x = train_test_split(images, test_size=valid_size, random_state=42)
-    train_y, valid_y = train_test_split(masks, test_size=valid_size, random_state=42)
+    train_x, valid_x = train_test_split(
+            images,
+            test_size=valid_size,
+            random_state=42
+    )
+    train_y, valid_y = train_test_split(
+            masks,
+            test_size=valid_size,
+            random_state=42
+    )
 
-    train_x, test_x = train_test_split(images, test_size=test_size, random_state=42)
-    train_y, test_y = train_test_split(masks, test_size=test_size, random_state=42)
+    train_x, test_x = train_test_split(
+            images,
+            test_size=test_size,
+            random_state=42
+    )
+    train_y, test_y = train_test_split(
+            masks,
+            test_size=test_size,
+            random_state=42
+    )
 
     return (train_x, train_y), (valid_x, valid_y), (test_x, test_y)
+
 
 def read_image(PATH):
     PATH = PATH.decode()
@@ -29,6 +46,7 @@ def read_image(PATH):
     x = x/255.0
     return x
 
+
 def read_mask(PATH):
     PATH = PATH.decode()
     x = cv2.imread(PATH, cv2.IMREAD_GRAYSCALE)
@@ -36,6 +54,7 @@ def read_mask(PATH):
     x = x/255.0
     x = np.expand_dims(x, axis=-1)
     return x
+
 
 def tf_parse(sx, sy):
     def _parse(x, y):
@@ -48,12 +67,14 @@ def tf_parse(sx, sy):
     sy.set_shape([128, 128, 1])
     return sx, sy
 
+
 def tf_dataset(x, y, batch=8):
     dataset = tf.data.Dataset.from_tensor_slices((x, y))
     dataset = dataset.map(tf_parse)
     dataset = dataset.batch(batch)
     dataset = dataset.repeat()
     return dataset
+
 
 if __name__ == "__main__":
     PATH = "../../Dataset/"

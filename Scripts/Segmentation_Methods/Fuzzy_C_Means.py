@@ -4,22 +4,18 @@ from __future__ import division, print_function
 import os
 import cv2
 import warnings
-import scipy.fftpack
 import numpy as np
-import matplotlib.pyplot as plt
 import skfuzzy as fuzz
 
 from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import scale
-from mpl_toolkits.mplot3d import Axes3D
 from time import time
 
 warnings.filterwarnings("ignore")
 
+
 # Class creation
 class FuzzyC(object):
-
+    # Read in the images.
     def readImage(self):
         folder = '../Evaluation Scans/Full/'
         list_images = os.listdir(folder)
@@ -31,7 +27,7 @@ class FuzzyC(object):
             img = cv2.medianBlur(img, 5)
             rgb_img = img.reshape((img.shape[0] * img.shape[1], 3))
             list_img.append(rgb_img)
-            
+
         return list_img
 
     def bwarea(self, img):
@@ -50,11 +46,11 @@ class FuzzyC(object):
                 elif sub_total == 0:
                     total += 0
                 else:
-                    r1c1 = img[r,c]
-                    r1c2 = img[r,c+1]
-                    r2c1 = img[r+1,c]
-                    r2c2 = img[r+1,c+1]
-                    
+                    r1c1 = img[r, c]
+                    r1c2 = img[r, c+1]
+                    r2c1 = img[r+1, c]
+                    r2c2 = img[r+1, c+1]
+
                     if (((r1c1 == r2c2) & (r1c2 == r2c1)) & (r1c1 != r2c1)):
                         total += 0.75
                     else:
@@ -63,7 +59,7 @@ class FuzzyC(object):
 
     def centroid_histogram(self, clt):
         numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
-        (hist, _) = np.histogram(clt.labels_, bins = numLabels)
+        (hist, _) = np.histogram(clt.labels_, bins=numLabels)
 
         hist = hist.astype("float")
         hist /= hist.sum()
@@ -71,11 +67,17 @@ class FuzzyC(object):
         return hist
 
     def plot_colors(self, hist, centroids):
-        bar = np.zeros((50, 300, 3), dtype = "uint8")
+        bar = np.zeros((50, 300, 3), dtype="uint8")
         startX = 0
         for (percent, color) in zip(hist, centroids):
             endX = startX + (percent * 300)
-            cv2.rectangle(bar, (int(startX), 0), (int(endX), 50), color.astype("uint8").tolist(), -1)
+            cv2.rectangle(
+                    bar,
+                    (int(startX), 0),
+                    (int(endX), 50),
+                    color.astype("uint8").tolist(),
+                    -1
+            )
             startX = endX
 
         return bar
@@ -98,25 +100,38 @@ class FuzzyC(object):
             img = np.reshape(rgb_img, (128, 128, 3)).astype(np.uint8)
             shape = np.shape(img)
 
-            clt = KMeans(n_clusters = clusters, n_jobs=4)
+            clt = KMeans(n_clusters=clusters, n_jobs=4)
             clt.fit(rgb_img)
             predict_img = clt.predict(rgb_img)
-            new_img = self.change_color_kmeans(predict_img, clt.cluster_centers_)
-            kmeans_img = np.reshape(new_img, shape).astype(np.uint8)
-            
-            hist = self.centroid_histogram(clt)
-            bar = self.plot_colors(hist, clt.cluster_centers_)
-            
+            new_img = self.change_color_kmeans(
+                    predict_img,
+                    clt.cluster_centers_
+            )
+            # kmeans_img = np.reshape(new_img, shape).astype(np.uint8)
+            # hist = self.centroid_histogram(clt)
+            # bar = self.plot_colors(hist, clt.cluster_centers_)
             new_time = time()
-            
+
             cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
-            rgb_img.T, clusters, 2, error=0.005, maxiter=1000, init=None,seed=42)
-            
-            new_img = self.change_color_fuzzycmeans(u,cntr)
-            fuzzy_img = np.reshape(new_img,shape).astype(np.uint8)
-            self.ret, self.seg_img = cv2.threshold(fuzzy_img, np.max(fuzzy_img) - 1, 255, cv2.THRESH_BINARY)
-            print(time() - new_time,'seconds')
-            print(self.bwarea(self.seg_img[:,:,1]))
+                    rgb_img.T,
+                    clusters,
+                    2,
+                    error=0.005,
+                    maxiter=1000,
+                    init=None,
+                    seed=42
+            )
+
+            new_img = self.change_color_fuzzycmeans(u, cntr)
+            fuzzy_img = np.reshape(new_img, shape).astype(np.uint8)
+            self.ret, self.seg_img = cv2.threshold(
+                    fuzzy_img,
+                    np.max(fuzzy_img) - 1,
+                    255,
+                    cv2.THRESH_BINARY
+            )
+            print(time() - new_time, 'seconds')
+            print(self.bwarea(self.seg_img[:, :, 1]))
 
             self.seg_array.append(self.seg_img)
 
@@ -137,7 +152,14 @@ class FuzzyC(object):
 
     def writeFile(self, OUTDIR):
         for i in range(len(self.seg_array)):
-            cv2.imwrite(OUTDIR + "Result_" + str(i) + ".png", self.seg_array[i])
+            cv2.imwrite(
+                    OUTDIR +
+                    "Result_" +
+                    str(i) +
+                    ".png",
+                    self.seg_array[i]
+            )
+
 
 if __name__ == "__main__":
     OUTDIR = './Fuzzy Results/Full/'

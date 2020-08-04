@@ -1,11 +1,9 @@
 # Import the required libraries.
-from __future__ import division, print_function
-
 import os
 import cv2
 import warnings
 import numpy as np
-import skfuzzy as fuzz
+# import matplotlib.pyplot as plt
 
 from sklearn.cluster import KMeans
 from time import time
@@ -13,18 +11,17 @@ from time import time
 warnings.filterwarnings("ignore")
 
 
-# Class creation
-class FuzzyC(object):
+# K-Means Image Segmentation.
+class KMeansSegment(object):
     # Read in the images.
     def readImage(self):
-        folder = '../Evaluation Scans/Full/'
+        folder = '../Evaluation Scans/Transversal/'
         list_images = os.listdir(folder)
         list_img = []
         for i in list_images:
             path = folder+i
             img = cv2.imread(path)
             img = cv2.resize(img, (128, 128))
-            img = cv2.medianBlur(img, 5)
             rgb_img = img.reshape((img.shape[0] * img.shape[1], 3))
             list_img.append(rgb_img)
 
@@ -58,43 +55,14 @@ class FuzzyC(object):
                         total += 0.5
         return total
 
-    def centroid_histogram(self, clt):
-        numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
-        (hist, _) = np.histogram(clt.labels_, bins=numLabels)
-
-        hist = hist.astype("float")
-        hist /= hist.sum()
-
-        return hist
-
-    def plot_colors(self, hist, centroids):
-        bar = np.zeros((50, 300, 3), dtype="uint8")
-        startX = 0
-        for (percent, color) in zip(hist, centroids):
-            endX = startX + (percent * 300)
-            cv2.rectangle(
-                    bar,
-                    (int(startX), 0),
-                    (int(endX), 50),
-                    color.astype("uint8").tolist(),
-                    -1
-            )
-            startX = endX
-
-        return bar
-
+    # Change the cluster color.
     def change_color_kmeans(self, predict_img, clusters):
         img = []
         for val in predict_img:
             img.append(clusters[val])
         return img
 
-    def change_color_fuzzycmeans(self, cluster_membership, clusters):
-        img = []
-        for pix in cluster_membership.T:
-            img.append(clusters[np.argmax(pix)])
-        return img
-
+    # Implementing K-Means algorithm.
     def process(self, list_img, clusters):
         self.seg_array = []
         for rgb_img in list_img[:]:
@@ -107,32 +75,18 @@ class FuzzyC(object):
             new_img = self.change_color_kmeans(
                     predict_img,
                     clt.cluster_centers_
-            )
-            # kmeans_img = np.reshape(new_img, shape).astype(np.uint8)
-            # hist = self.centroid_histogram(clt)
-            # bar = self.plot_colors(hist, clt.cluster_centers_)
+                    )
+            kmeans_img = np.reshape(new_img, shape).astype(np.uint8)
             new_time = time()
 
-            cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
-                    rgb_img.T,
-                    clusters,
-                    2,
-                    error=0.005,
-                    maxiter=1000,
-                    init=None,
-                    seed=42
-            )
-
-            new_img = self.change_color_fuzzycmeans(u, cntr)
-            fuzzy_img = np.reshape(new_img, shape).astype(np.uint8)
             self.ret, self.seg_img = cv2.threshold(
-                    fuzzy_img,
-                    np.max(fuzzy_img) - 1,
+                    kmeans_img,
+                    np.max(kmeans_img) - 1,
                     255,
                     cv2.THRESH_BINARY
             )
-            print(time() - new_time, 'seconds')
-            print(self.bwarea(self.seg_img[:, :, 1]))
+            print("Time:", time() - new_time, 'seconds')
+            print("BWAREA:", self.bwarea(self.seg_img[:, :, 1]))
 
             self.seg_array.append(self.seg_img)
 
@@ -142,7 +96,7 @@ class FuzzyC(object):
             plt.xticks([]), plt.yticks([])
 
             plt.subplot(132)
-            plt.gca().set_title("Fuzzy"), plt.imshow(fuzzy_img)
+            plt.gca().set_title("K-Means"), plt.imshow(kmeans_img)
             plt.xticks([]), plt.yticks([])
 
             plt.subplot(133)
@@ -163,9 +117,9 @@ class FuzzyC(object):
 
 
 if __name__ == "__main__":
-    OUTDIR = './Fuzzy Results/Full/'
+    OUTDIR = './KMeans Results/Transversal/'
 
-    fuzzy = FuzzyC()
-    list_img = fuzzy.readImage()
-    fuzzy.process(list_img, 6)
-    fuzzy.writeFile(OUTDIR)
+    means = KMeansSegment()
+    list_img = means.readImage()
+    means.process(list_img, 4)
+    means.writeFile(OUTDIR)

@@ -130,8 +130,8 @@ class Evaluate(object):
 # Main method.
 if __name__ == "__main__":
 
-    gt_image = './Masks/Full/'
-    pred_image = './Segmentation Methods/Fuzzy Results/Full/'
+    gt_image = './Masks/Transversal/'
+    pred_image = './Segmentation_Methods/KMeans Results/Transversal/'
 
     num_images = len(os.listdir(gt_image))
 
@@ -182,9 +182,9 @@ if __name__ == "__main__":
     print("Average Weighted IOU: ", str(round(fwIOU, 3)))
 
     # Write results to file.
-    f = open('./Segmentation Methods/'
-             'Evaluation Results/Fuzzy CMeans/'
-             'Full/Fuzzy_CMeans.txt', 'w')
+    f = open('./Segmentation_Methods/'
+             'Evaluation Results/KMeans/'
+             'Transversal/KMeans.txt', 'w')
 
     f.write('Average Pixel Accuracy: %s \n' % (str(round(pa, 3))))
     f.write('Average Mean Accuracy: %s \n' % (str(round(ma, 3))))

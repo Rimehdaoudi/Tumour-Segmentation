@@ -1,6 +1,10 @@
 # Brain tumour segmentation of Magnetic Resonance Images
 This repository contains the python implementation used to segment tumours from 2D brain scans using the U-Net archietecture. The code was developed based on the research I carried out during my disertation for my MSc degree at University College Dublin where I explored medical image segmentation using a basic U-Net architecture and bechmarked its performance to other similar segmentation methods.
 
+<p align="center">
+  <img src="https://miykael.github.io/nipype-beginner-s-guide/_images/GM.gif" />
+</p>
+
 ## Requirements
 Please note that U-Net and LinkNet were implemented using **Tensorflow 2.0** and all scripts available are written in **python 3.8**. Using older versions of either software may cause conflicts and may hinder your ability to run each individual scripts. To install these requirements please see the following commands below.
 

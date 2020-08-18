@@ -55,3 +55,29 @@ The UNET was developed by Olaf Ronneberger et al. for Bio Medical Image Segmenta
 ![U-Net](https://miro.medium.com/max/2824/1*f7YOaE4TWubwaFF7Z1fzNw.png)
 
 The files to run the network can be found in the folder titled **UNet**. The files are sequential order meaning each file depends on the other. The script **Data.py** is very simple it intakes your image directory and creates a data pipeline to load your images using _tensorflow_. The script **Model.py** is where the main implementation of U-Nets architecture recides. This file does not have to be executed but the function **_build_model_** builds your model, hence the name, and should be called directly from the training script **Train.py**. The script **Train.py** should be executed directly from the command line to run the network. This network is fine-tuned to for 1 class segmentation, to convert this network to suit the application of multi-class segmentation you will need to mopdify several paramaters. Finally, the script **Predict.py** is used to load the saved model's created during training which can be loaded from the directory **"../Models"**. Using this script you can export the predictions made using a loaded model to a directory of your choice.
+
+## Evaluation
+To evaluate your prediction images obtained from either U-Net or one of the provided benchmarking algorithms you simply have to edit the evaluator script **Evaluator.py**. The evaluator scripts contains four performance metrics which can be used to evaluate an array of prediction images against the original ground truth masks. To use this file you must change the directory of your images to match the image files you are trying to evaluate. These directory paths have automatically been set according to the most recent file evaluated. Once compiled, the script will output a small table of results which is the overall average of all results for each metric. With this output the script will also write the results to a specified directory provided before compiliation.
+
+## Benchmarking
+Systimatic benchmarking was used to compare the performance of our proposed models to that of more widely used image processing/computer vision segmentation techniques. The alogorithms chosen for the purposes of benchmarking includes the following:
+
+1. Binary Thresholding & the watershed algorithm
+1. K-Means
+1. Fuzzy C-Means
+1. LinkNet
+
+Methods 1-3 are manual based segmentation algorithms meaning they require manual assistance to segment specific regions of interest (ROI) from 2-dimensional imagery. Each method is based on existing techniques which were applied to extract brain tumours from an MRI brain scan or were used for a similar purpose in the domain of medical computer imagery. Each script can be executed directly from the command line which will in turn write the prediction images to a provided directory which can then be used for evaluation purposes by re-running the **Evaluator.py** script. Each individual script comes with seperate implementations of the proposed steps which is discussed within each paper, please try to understand these methods before altering parameters as these methods were written to work in coherence with it's other neighbouring functions. For example, see the code block below. This function was written for the purpose of **_skull extraction_** more commonly known as **_skull stripping_**. The function is cruicial to the operation of k-means to produce an array of images for the algorithm to use for evaluation purposes.
+
+```python
+def skullStrip(self, images):
+    gray_imgs = []
+    brains = []
+    for i in range(len(images)):
+        gray_img = cv2.cvtColor(images[i], cv2.COLOR_BGR2GRAY)
+        gray_imgs.append(gray_img)
+        ret, thresh = cv2.threshold(gray_imgs[i], 0, 255, cv2.THRESH_OTSU)
+        .
+        .
+        .   
+```

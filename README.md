@@ -86,6 +86,36 @@ def skullStrip(self, images):
         .   
 ```
 
-If you wish to run LinkNet, you can safely assume the same procedure used during your operation of U-Net meaning you need only to run the **Train.py** & **Predict.py** scripts. The output of LinkNet's **Predict.py** will write new predictions in the form of binary maps were each map is on a scale between 0 - 255 which easily allows you to evaluate your data with **Evaluate.py**. To note, please create the directory to store LinkNets results and csv files as the python scripts written DO NOT create these directories.
+If you wish to run LinkNet, you can safely assume the same procedure used during your operation of U-Net meaning you need only to run the **Train.py** & **Predict.py** scripts. The output of LinkNet's **Predict.py** will write new predictions in the form of binary maps were each map is on a scale between 0 - 255 which easily allows you to evaluate your data with **Evaluator.py**. To note, please create the directory to store LinkNets results and csv files as the python scripts written DO NOT create these directories.
 
 ## Miscellaneous
+Along with repository some files have been included which were not used during development or were used at a very early satge during the devlopment cycle. These files were included in case they may be of use at a later stage if development of a similar project was to commence. These two files are **Display.py** and **Converter.py**. **Display.py** was used during the early development stage of the project, its purpose was to display certain 3-dimensional **_slices_** to the screen via a simple function which intakes the analysts slice number. However, as the dataset was coverted to 2-dimensional these functions were no longer needed. To call these functions you should directly call them from a **_main_** function coupled with operations written in the **Load.py** script.
+
+```python
+def displayImages(self, dataFile, numImages, startSlice, incSlices):
+    fig, ax = plt.subplots(1, numImages, figsize=[18, 6])
+    self.img = self.image.loadImage(self.imageDir + dataFile)
+    self.imageData = self.img.get_fdata()
+    
+    for i in range(numImages):
+        ax[i].imshow(self.imageData[startSlice, :, :], 'gray')
+        ax[i].set_xticks([])
+        ax[i].set_yticks([])
+        ax[i].set_title('Slice number: {}'.format(startSlice), color='r')
+        startSlice += incSlices
+
+    fig.subplots_adjust(wspace=0, hspace=0)
+    plt.show()
+```
+
+The second script **Converter.py** is a simple 3-dimensional converter which can be used to convert MRI .MNC files to .NII files. The script was used early during the projects development cycle, however, decisions were later madce to stick with .MNC files as nibabel has appropriate compatibility with these 3-dimensional MRI files. Caution, use of this file should be avoided as data loss was recorded as the files were converted. Instead of using this script I would suggest you use the more appropriate [MINC toolkit](http://bic-mni.github.io/).
+
+```python
+def conversion(self):
+    for i in range(len(self.fileList)):
+        minc = load(self.dir + self.fileList[i])
+        basename = self.fileList[i].split(os.extsep, 1)[0]
+        out = Nifti1Image(minc.get_fdata(), affine=self.affine)
+        save(out, self.dir + basename + '.nii.gz')
+        print("Converting: ", basename)
+```

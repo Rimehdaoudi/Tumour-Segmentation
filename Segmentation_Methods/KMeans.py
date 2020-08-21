@@ -1,6 +1,6 @@
 # Import the required libraries.
-import os
 import cv2
+import glob
 import warnings
 import numpy as np
 # import matplotlib.pyplot as plt
@@ -13,19 +13,36 @@ warnings.filterwarnings("ignore")
 
 # K-Means Image Segmentation.
 class KMeansSegment(object):
-    # Read in the images.
-    def readImage(self):
-        folder = '../Evaluation Scans/Transversal/'
-        list_images = os.listdir(folder)
-        list_img = []
-        for i in list_images:
-            path = folder+i
-            img = cv2.imread(path)
-            img = cv2.resize(img, (128, 128))
-            rgb_img = img.reshape((img.shape[0] * img.shape[1], 3))
-            list_img.append(rgb_img)
+    # Skull strip the brain scans.
+    def skullStrip(self, images):
+        gray_imgs = []
+        brains = []
+        for i in range(len(images)):
+            gray_img = cv2.cvtColor(images[i], cv2.COLOR_BGR2GRAY)
+            gray_imgs.append(gray_img)
+            ret, thresh = cv2.threshold(gray_imgs[i], 0, 255, cv2.THRESH_OTSU)
+            colormask = np.zeros(images[i].shape, dtype=np.uint8)
+            colormask[thresh != 0] = np.array((0, 0, 255))
+            ret, markers = cv2.connectedComponents(thresh)
+            marker_area = [
+                    np.sum(markers == m)
+                    for m in range(np.max(markers)) if m != 0
+            ]
+            largest_component = np.argmax(marker_area)+1
+            brain_mask = markers == largest_component
+            brain_out = images[i].copy()
+            brain_out[brain_mask == False] = (0, 0, 0)
+            brains.append(brain_out)
+        return brains
 
-        return list_img
+    # Process the skull stripped images.
+    def readSkulls(self, brains):
+        skull_imgs = []
+        for i in range(len(brains)):
+            img = cv2.resize(brains[i], (128, 128))
+            rgb_img = img.reshape((img.shape[0] * img.shape[1], 3))
+            skull_imgs.append(rgb_img)
+        return skull_imgs
 
     # Compute the area of the objects in a binary image.
     def bwarea(self, img):
@@ -90,6 +107,7 @@ class KMeansSegment(object):
 
             self.seg_array.append(self.seg_img)
 
+            # Un-comment if you want to display the images via matplotlib.
             """
             plt.subplot(131)
             plt.gca().set_title("Original"), plt.imshow(img)
@@ -105,6 +123,7 @@ class KMeansSegment(object):
             plt.show()
             """
 
+    # Write the image to chosen directory.
     def writeFile(self, OUTDIR):
         for i in range(len(self.seg_array)):
             cv2.imwrite(
@@ -116,10 +135,14 @@ class KMeansSegment(object):
             )
 
 
+# Main method.
 if __name__ == "__main__":
-    OUTDIR = './KMeans Results/Transversal/'
+    OUTDIR = './KMeans Results/Full/'
+    PATH = "../Evaluation Scans/Full/"
+    images = [cv2.imread(file) for file in glob.glob(PATH + "*.png")]
 
     means = KMeansSegment()
-    list_img = means.readImage()
-    means.process(list_img, 4)
+    skulls = means.skullStrip(images)
+    proc_skulls = means.readSkulls(skulls)
+    means.process(proc_skulls, 4)
     means.writeFile(OUTDIR)

@@ -85,3 +85,7 @@ def skullStrip(self, images):
         .
         .   
 ```
+
+If you wish to run LinkNet, you can safely assume the same procedure used during your operation of U-Net meaning you need only to run the **Train.py** & **Predict.py** scripts. The output of LinkNet's **Predict.py** will write new predictions in the form of binary maps were each map is on a scale between 0 - 255 which easily allows you to evaluate your data with **Evaluate.py**. To note, please create the directory to store LinkNets results and csv files as the python scripts written DO NOT create these directories.
+
+## Miscellaneous

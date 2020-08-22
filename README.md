@@ -64,7 +64,7 @@ The files to run the network can be found in the folder titled **UNet**. The fil
 To evaluate your prediction images obtained from either U-Net or one of the provided benchmarking algorithms you simply have to edit the evaluator script **Evaluator.py**. The evaluator scripts contains four performance metrics which can be used to evaluate an array of prediction images against the original ground truth masks. To use this file you must change the directory of your images to match the image files you are trying to evaluate. These directory paths have automatically been set according to the most recent file evaluated. Once compiled, the script will output a small table of results which is the overall average of all results for each metric. With this output the script will also write the results to a specified directory provided before compiliation.
 
 ## Benchmarking
-Systimatic benchmarking was used to compare the performance of our proposed models to that of more widely used image processing/computer vision segmentation techniques. The alogorithms chosen for the purposes of benchmarking includes the following:
+Systematic benchmarking was used to compare the performance of our proposed models to that of more widely used image processing/computer vision segmentation techniques. The alogorithms chosen for the purposes of benchmarking includes the following:
 
 1. Binary Thresholding & the watershed algorithm
 1. K-Means
